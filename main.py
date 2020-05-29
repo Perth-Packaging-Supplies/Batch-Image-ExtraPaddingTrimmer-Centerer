@@ -11,8 +11,7 @@ def trim(image):
     diff = ImageChops.difference(image, bg)
     diff = ImageChops.add(diff, diff, 2.0, -100)
     bbox = diff.getbbox()
-    if bbox:
-        return image.crop(bbox)
+    return image.crop(bbox)
 
 # Resizes the image
 def resizeToSizePreserveRatio(image,baseSize):
@@ -91,26 +90,31 @@ def main():
             print()
 
         for imageName in imageNames:
+            print("Processing:{} from {}".format(imageName,path))
             imageName,imageFormat = imageName.split(".")
             image = Image.open("{}/{}.{}".format(path,imageName,imageFormat))
             image = trim(image)
-
             TOTAL_SIZE = 300
             BASE_SIZE = int(TOTAL_SIZE*0.70)
             image = resizeToSizePreserveRatio(image,BASE_SIZE)
 
             # image = removeWhiteBackground(image)
             # PADDING ADDITION
+            imageFirstPixelColor = image.getpixel((0,0))
+            imageFirstPixelColor = (255,255,255) if (imageFirstPixelColor!=(0,0,0)) else imageFirstPixelColor
+
+            print(imageFirstPixelColor)
             BORDER_SIZE = int(TOTAL_SIZE*0.15)
-            image = addPadding(image,BORDER_SIZE)
+            image = addPadding(image,BORDER_SIZE,imageFirstPixelColor)
 
-            # MAKE SQUARe
-            image = makeSquare(image)
-
-            #REMOVE "input" in the pathname
+            # MAKE SQUARE
+            image = makeSquare(image,imageFirstPixelColor)
 
             image.save("outputNormal{}/{}.{}".format(outputPath,imageName,imageFormat),"PNG")
-            os.popen("magick convert outputNormal{}/{}.{} -fuzz 5% -fill magenta -draw \"color 0,0 floodfill\" -transparent magenta outputTransparent{}/{}.{}".format(outputPath,imageName,imageFormat,outputPath,imageName,imageFormat))
+            if (imageFormat=="jpg"):
+                image.save("outputTransparent{}/{}.{}".format(outputPath,imageName,imageFormat),"PNG")
+            else:
+                os.popen("magick convert outputNormal{}/{}.{} -fuzz 5% -fill none -draw \"color 0,0 floodfill\" -transparent none outputTransparent{}/{}.{}".format(outputPath,imageName,imageFormat,outputPath,imageName,imageFormat))
 
 if __name__ == "__main__":
     main()
