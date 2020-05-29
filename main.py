@@ -86,6 +86,7 @@ def main():
 
         try:
             os.mkdir("outputNormal{}".format(outputPath))
+            os.mkdir("outputTransparent{}".format(outputPath))
         except:
             print()
 
@@ -109,7 +110,7 @@ def main():
             #REMOVE "input" in the pathname
 
             image.save("outputNormal{}/{}.{}".format(outputPath,imageName,imageFormat),"PNG")
-
+            os.popen("magick convert outputNormal{}/{}.{} -fuzz 5% -fill magenta -draw \"color 0,0 floodfill\" -transparent magenta outputTransparent{}/{}.{}".format(outputPath,imageName,imageFormat,outputPath,imageName,imageFormat))
 
 if __name__ == "__main__":
     main()
