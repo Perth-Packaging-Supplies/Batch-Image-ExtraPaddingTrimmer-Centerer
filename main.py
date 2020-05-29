@@ -1,6 +1,9 @@
-from PIL import Image, ImageChops
+from PIL import Image, ImageChops, ImageOps
 import glob
 import numpy as np
+from os import listdir
+import os
+import shutil
 
 # Trims the Image
 def trim(image):
@@ -13,21 +16,20 @@ def trim(image):
 
 # Resizes the image
 def resizeToSizePreserveRatio(image,baseSize):
-    imageWidth = image.size[0]
-    imageHeight = image.size[1]
+    imageWidth,imageHeight = image.size
 
     maxImageDimension = max(imageHeight,imageWidth)
-    percentDiff = BASE_SIZE/maxImageDimension
+    percentDiff = baseSize/maxImageDimension
 
     # The Image Is Portrait
     if(maxImageDimension==imageHeight):
         otherImageDimension = int(float(imageWidth)*float(percentDiff))
-        return image.resize((otherImageDimension,BASE_SIZE),Image.ANTIALIAS)
+        return image.resize((otherImageDimension,baseSize),Image.ANTIALIAS)
 
     #The Image is LandScape
     else:
         otherImageDimension = int(float(imageHeight)*float(percentDiff))
-        return image.resize((BASE_SIZE,otherImageDimension),Image.ANTIALIAS)
+        return image.resize((baseSize,otherImageDimension),Image.ANTIALIAS)
 
 def removeWhiteBackground(image):
     image = image.convert("RGBA")
@@ -53,12 +55,52 @@ def removeWhiteBackground(image):
 
     return image
 
-image = Image.open("input/test.png")
-image = trim(image)
+def addPadding(image,borderSize,fillColor="white"):
+    return ImageOps.expand(image,border=borderSize,fill=fillColor)
 
-BASE_SIZE = 300
-image = resizeToSizePreserveRatio(image,BASE_SIZE)
+def makeSquare(image,fillColor="white"):
+    width,height = image.size
+    size = max(width,height)
+    newImage = Image.new("RGBA",(size,size),fillColor)
+    newImage.paste(image, (int((size - width) / 2), int((size - height) / 2)))
+    return newImage
 
-image = removeWhiteBackground(image)
+def deleteFolderInPath(path):
+    for filename in os.listdir(path):
+        filepath = os.path.join(path, filename)
+        try:
+            shutil.rmtree(filepath)
+        except OSError:
+            os.remove(filepath)
 
-image.save("output/test.png","PNG")
+def main():
+    #DELETE FILES IN OUTPUT FOLDERS
+    deleteFolderInPath("outputNormal")
+    deleteFolderInPath("outputTransparent")
+
+    allImages = listdir("input")
+
+    for imageName in allImages:
+        imageName,imageFormat = imageName.split(".")
+        image = Image.open("input/{}.{}".format(imageName,imageFormat))
+        image = trim(image)
+
+        TOTAL_SIZE = 300
+        BASE_SIZE = int(TOTAL_SIZE*0.70)
+        image = resizeToSizePreserveRatio(image,BASE_SIZE)
+
+        # image = removeWhiteBackground(image)
+        # PADDING ADDITION
+        BORDER_SIZE = int(TOTAL_SIZE*0.15)
+        image = addPadding(image,BORDER_SIZE)
+
+        # MAKE SQUARe
+        image = makeSquare(image)
+
+        image.save("outputNormal/{}.{}".format(imageName,imageFormat),"PNG")
+
+
+if __name__ == "__main__":
+    main()
+    os.system("start.sh")
+
