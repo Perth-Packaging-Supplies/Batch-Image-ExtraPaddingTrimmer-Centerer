@@ -1,7 +1,7 @@
 from PIL import Image, ImageChops, ImageOps
 import glob
 import numpy as np
-from os import listdir
+from os import listdir,walk
 import os
 import shutil
 
@@ -78,29 +78,40 @@ def main():
     deleteFolderInPath("outputNormal")
     deleteFolderInPath("outputTransparent")
 
-    allImages = listdir("input")
+    allDirectories =  walk("input")
 
-    for imageName in allImages:
-        imageName,imageFormat = imageName.split(".")
-        image = Image.open("input/{}.{}".format(imageName,imageFormat))
-        image = trim(image)
+    for path,directories,imageNames in allDirectories:
+        path = path.replace("\\","/")
+        outputPath = path[5:]
 
-        TOTAL_SIZE = 300
-        BASE_SIZE = int(TOTAL_SIZE*0.70)
-        image = resizeToSizePreserveRatio(image,BASE_SIZE)
+        try:
+            os.mkdir("outputNormal{}".format(outputPath))
+        except:
+            print()
 
-        # image = removeWhiteBackground(image)
-        # PADDING ADDITION
-        BORDER_SIZE = int(TOTAL_SIZE*0.15)
-        image = addPadding(image,BORDER_SIZE)
+        for imageName in imageNames:
+            imageName,imageFormat = imageName.split(".")
+            image = Image.open("{}/{}.{}".format(path,imageName,imageFormat))
+            image = trim(image)
 
-        # MAKE SQUARe
-        image = makeSquare(image)
+            TOTAL_SIZE = 300
+            BASE_SIZE = int(TOTAL_SIZE*0.70)
+            image = resizeToSizePreserveRatio(image,BASE_SIZE)
 
-        image.save("outputNormal/{}.{}".format(imageName,imageFormat),"PNG")
+            # image = removeWhiteBackground(image)
+            # PADDING ADDITION
+            BORDER_SIZE = int(TOTAL_SIZE*0.15)
+            image = addPadding(image,BORDER_SIZE)
+
+            # MAKE SQUARe
+            image = makeSquare(image)
+
+            #REMOVE "input" in the pathname
+
+            image.save("outputNormal{}/{}.{}".format(outputPath,imageName,imageFormat),"PNG")
 
 
 if __name__ == "__main__":
     main()
-    os.system("start.sh")
+    # os.system("start.sh")
 
