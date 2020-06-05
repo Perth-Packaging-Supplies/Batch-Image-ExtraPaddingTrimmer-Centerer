@@ -73,6 +73,9 @@ def deleteFolderInPath(path):
             os.remove(filepath)
 
 def main():
+    # PRINT TO TEXT FILE
+    log = open('log.txt', 'w')
+
     #DELETE FILES IN OUTPUT FOLDERS
     deleteFolderInPath("outputNormal")
     deleteFolderInPath("outputTransparent")
@@ -90,33 +93,40 @@ def main():
             print()
 
         for imageName in imageNames:
-            print("Processing:{} from {}".format(imageName,path))
-            imageName,imageFormat = imageName.split(".")
-            image = Image.open("{}/{}.{}".format(path,imageName,imageFormat))
-            image = trim(image)
-            TOTAL_SIZE = 300
-            BASE_SIZE = int(TOTAL_SIZE*0.70)
-            image = resizeToSizePreserveRatio(image,BASE_SIZE)
+            try:
+                print("Processing:{} from {}".format(imageName,path))
+                lastDotIndex = imageName.rfind(".")
+                [imageName,imageFormat] = [imageName[0:lastDotIndex],imageName[lastDotIndex+1:]]
+                image = Image.open("{}/{}.{}".format(path,imageName,imageFormat)).convert("RGBA")
+                iccProfile = image.info.get("icc_profile",'')
 
-            # image = removeWhiteBackground(image)
-            # PADDING ADDITION
-            imageFirstPixelColor = image.getpixel((0,0))
-            imageFirstPixelColor = (255,255,255) if (imageFirstPixelColor!=(0,0,0)) else imageFirstPixelColor
+                image = trim(image)
+                TOTAL_SIZE = 300
+                BASE_SIZE = int(TOTAL_SIZE*0.70)
+                image = resizeToSizePreserveRatio(image,BASE_SIZE)
 
-            print(imageFirstPixelColor)
-            BORDER_SIZE = int(TOTAL_SIZE*0.15)
-            image = addPadding(image,BORDER_SIZE,imageFirstPixelColor)
+                # image = removeWhiteBackground(image)
+                # PADDING ADDITION
+                imageFirstPixelColor = image.getpixel((0,0))
+                imageFirstPixelColor = (255,255,255) if (imageFirstPixelColor!=(0,0,0)) else imageFirstPixelColor
 
-            # MAKE SQUARE
-            image = makeSquare(image,imageFirstPixelColor)
+                BORDER_SIZE = int(TOTAL_SIZE*0.15)
+                image = addPadding(image,BORDER_SIZE,imageFirstPixelColor)
 
-            image.save("outputNormal{}/{}.{}".format(outputPath,imageName,imageFormat),"PNG")
-            if (imageFormat=="jpg"):
-                image.save("outputTransparent{}/{}.{}".format(outputPath,imageName,imageFormat),"PNG")
-            else:
-                os.popen("magick convert outputNormal{}/{}.{} -fuzz 5% -fill none -draw \"color 0,0 floodfill\" -transparent none outputTransparent{}/{}.{}".format(outputPath,imageName,imageFormat,outputPath,imageName,imageFormat))
+                # MAKE SQUARE
+                image = makeSquare(image,imageFirstPixelColor)
+
+                image.save("outputNormal{}/{}.{}".format(outputPath,imageName,imageFormat),"PNG",icc_profile=iccProfile)
+                if (imageFormat=="jpg"):
+                    image.save("outputTransparent{}/{}.{}".format(outputPath,imageName,imageFormat),"PNG",icc_profile=iccProfile)
+                else:
+                    os.popen("magick convert outputNormal{}/{}.{} -fuzz 5% -fill none -draw \"color 0,0 floodfill\" -transparent none outputTransparent{}/{}.{}".format(outputPath,imageName,imageFormat,outputPath,imageName,imageFormat))
+            except Exception as err:
+                log.write("Error with {}.{} \n".format(imageName,imageFormat))
+                print(err)
 
 if __name__ == "__main__":
     main()
+    print("FINISHED")
     # os.system("start.sh")
 
