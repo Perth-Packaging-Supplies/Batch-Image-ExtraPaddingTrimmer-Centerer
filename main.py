@@ -107,8 +107,8 @@ def main():
 
                 # image = removeWhiteBackground(image)
                 # PADDING ADDITION
-                imageFirstPixelColor = image.getpixel((0,0))
-                imageFirstPixelColor = (255,255,255) if (imageFirstPixelColor!=(0,0,0)) else imageFirstPixelColor
+                imageFirstPixelColor = image.getpixel((0, 0))
+                imageFirstPixelColor = (255,255,255) if (imageFirstPixelColor!=(0,0,0,255)) else imageFirstPixelColor
 
                 BORDER_SIZE = int(TOTAL_SIZE*0.15)
                 image = addPadding(image,BORDER_SIZE,imageFirstPixelColor)
@@ -120,7 +120,8 @@ def main():
                 if (imageFormat=="jpg"):
                     image.save("outputTransparent{}/{}.{}".format(outputPath,imageName,imageFormat),"PNG",icc_profile=iccProfile)
                 else:
-                    os.popen("magick convert outputNormal{}/{}.{} -fuzz 5% -fill none -draw \"color 0,0 floodfill\" -transparent none outputTransparent{}/{}.{}".format(outputPath,imageName,imageFormat,outputPath,imageName,imageFormat))
+                    print()
+                    # os.popen("magick convert outputNormal{}/{}.{} -fuzz 5% -fill none -draw \"color 0,0 floodfill\" -transparent none outputTransparent{}/{}.{}".format(outputPath,imageName,imageFormat,outputPath,imageName,imageFormat))
             except Exception as err:
                 log.write("Error with {}.{} \n".format(imageName,imageFormat))
                 print(err)
