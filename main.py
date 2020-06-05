@@ -120,8 +120,7 @@ def main():
                 if (imageFormat=="jpg"):
                     image.save("outputTransparent{}/{}.{}".format(outputPath,imageName,imageFormat),"PNG",icc_profile=iccProfile)
                 else:
-                    print()
-                    # os.popen("magick convert outputNormal{}/{}.{} -fuzz 5% -fill none -draw \"color 0,0 floodfill\" -transparent none outputTransparent{}/{}.{}".format(outputPath,imageName,imageFormat,outputPath,imageName,imageFormat))
+                    os.popen("magick convert outputNormal{}/{}.{} -fuzz 5% -fill none -draw \"color 0,0 floodfill\" -transparent none outputTransparent{}/{}.{}".format(outputPath,imageName,imageFormat,outputPath,imageName,imageFormat))
             except Exception as err:
                 log.write("Error with {}.{} \n".format(imageName,imageFormat))
                 print(err)
