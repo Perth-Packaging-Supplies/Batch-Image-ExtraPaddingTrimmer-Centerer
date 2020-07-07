@@ -7,6 +7,8 @@ import shutil
 
 TOTAL_SIZE = 300
 BASE_SIZE = int(TOTAL_SIZE*0.70)
+BORDER_SIZE = int(TOTAL_SIZE*0.15) # BORDER SIZE REFERS TO TWO SIDES,
+# CURRENT SETTING IS 0.7 + 0.15 * 2 Sides for an Image
 
 # Trims the Image
 def trim(image):
@@ -108,7 +110,7 @@ def main():
                 imageFirstPixelColor = image.getpixel((0, 0))
                 imageFirstPixelColor = (255,255,255) if (imageFirstPixelColor!=(0,0,0,255)) else imageFirstPixelColor
 
-                BORDER_SIZE = int(TOTAL_SIZE*0.15)
+
                 image = addPadding(image,BORDER_SIZE,imageFirstPixelColor)
 
                 # MAKE SQUARE
