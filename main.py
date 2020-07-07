@@ -5,6 +5,9 @@ from os import listdir,walk
 import os
 import shutil
 
+TOTAL_SIZE = 300
+BASE_SIZE = int(TOTAL_SIZE*0.70)
+
 # Trims the Image
 def trim(image):
     inverted = ImageOps.invert(image.convert("RGB"))
@@ -98,8 +101,6 @@ def main():
                 iccProfile = image.info.get("icc_profile",'')
 
                 image = trim(image)
-                TOTAL_SIZE = 300
-                BASE_SIZE = int(TOTAL_SIZE*0.70)
                 image = resizeToSizePreserveRatio(image,BASE_SIZE)
 
                 # image = removeWhiteBackground(image)
