@@ -1,4 +1,5 @@
 # Batch-Image-ExtraPaddingTrimmer+Centerer
+Video Documentation: https://youtu.be/hZQocChysnU
 
 # What is it?
 This program is mainly used for digital marketting. This script will do the following for a batch of pictures:
